@@ -1,0 +1,12 @@
+04a336c33f42115a2ad8db915262d107 *DESCRIPTION
+3ace8a616834386180ec066a3653f4a2 *LICENSE
+1dabd26b5d18da7ad044f26d0f31dbc8 *NAMESPACE
+b900a14ab276a301ea00d5e3da2690f6 *R/align_pander.R
+a937b7c5417832343c2659ca5cfe6270 *R/format_engr.R
+67e8ea63444f3e919b77fcf3dbfaa6d8 *R/put_axes.R
+b480855847ac6587babef791f4900c03 *R/put_gap.R
+c25fac14463eb414ff6f4041bdd5d097 *README.md
+8a6166ed76460a980f7ffa5fa5d348af *man/align_pander.Rd
+e7b2d353a93bda79a70aab0dc9f19f59 *man/format_engr.Rd
+94431c9de4acdc089ae8d8545d1f300d *man/put_axes.Rd
+65182ebbbb826187af00b873ac4d529b *man/put_gap.Rd
