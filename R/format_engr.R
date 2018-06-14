@@ -1,188 +1,271 @@
+#' @importFrom magrittr %>%
+#' @importFrom dplyr mutate filter select left_join if_else bind_cols
+#' @importFrom tidyr gather separate spread
+#' @importFrom stringr  str_replace str_c str_detect str_trim
+#' @importFrom rlang syms is_double is_integer is_character
+#' @importFrom purrr map
+#' @importFrom lubridate is.Date
+NULL
+
 #' Format numerical variables in engineering notation.
 #'
-#' Converts numeric objects into character variables formatted in engineering
-#' notation: base 10 with exponents that are multiples of 3. The input argument
-#' is a numeric vector or a data frame with at least one numeric variable.
+#' Converts numeric variables in a data frame into character variables
+#' formatted in engineering notation. The formatted character variables
+#' are delimited with \code{$...$} for rendering as inline math.
 #'
-#' The preferred input is a data frame. If the input is a numeric vector, it
-#' will be formatted and returned as a data frame with the variable name
-#' \code{value}. To preserve the variable name from the calling script, convert
-#' the number or vector to a data frame before calling \code{engr_format()}.
-#'
-#' Non-numeric variables in a data frame are unaffected and are returned as-is.
-#'
-#' Each numeric variable can be assigned its own number of significant digits.
-#' The default is 4. If \code{sigdig} is a single value, it is used for all
-#' variables; if an array, an excess number of elements is truncated and a
-#' shortage of elements is filled with the default 4. Setting \code{sigdig = 0}
-#' returns the numerical variable as-is.
+#' Engineering notation is a subset of scientific notation: the exponent of
+#' ten must be divisible by three. Powers of ten are written with a product
+#' symbol (the LaTeX \code{\\times} symbol), not computer E-notation. The
+#' numerical output strings are bounded by \code{$...$} for rendering in
+#' math mode.
 #'
 #' The output format is "coefficient x 10^exponent" except for exponents equal
-#' to 0, 1, or 2. In these cases, the output #' format is floating-point. In all
-#' cases, the decimal point in the coefficient floats.
+#' to 0, 1, or 2. In these cases, the output format is floating-point.
 #'
-#' Trailing zeros to the right of a decimal are significant. A trailing zero
-#' before a decimal is ambiguous; such numbers are reported with the decimal
-#' moved an additional three places to the left except for cases in which doing
-#' so results in a zero coefficient due to a small number of significant digits.
+#' The input argument is a data frame with at least one numeric variable.
+#' Only double variables (not integers and not dates) are formatted in
+#' powers of ten.
 #'
-#' The numerical output strings are bounded by \code{"$...$"} for rendering in
-#' an R markdown output document, e.g., HTML, PDF, or DOCX. For example, the Rmd
-#' code chunk  \code{knitr::kable(engr_format(df))} prints the formatted data
-#' frame to the output document.
+#' The function distinguishes between integers that represent factors and
+#' those that represent numerical integers. Numerical integers are returned
+#' as characters in math mode. Factors and other non-numeric variables
+#' are returned unaffected.
+#'
+#' Each double variable (except dates) can be assigned its own number
+#' of significant digits. The default is 4. If \code{sigdig} is a single
+#' value, it is used for all variables; if a vector, it must have the
+#' same number of elements as there are double variables in the data frame.
+#' Setting \code{sigdig = 0} returns the double variables as characters
+#' but unaltered.
+#'
+#' For numbers with no decimal point, trailing zeros can be ambiguous.
+#' Such numbers can be optionally reported with the decimal moved an
+#' additional three places to the left.
 #'
 #' To learn more about docxtools, start with the vignettes:
 #' \code{browseVignettes(package = "docxtools")}.
 #'
-#' @param x : The numeric object to be formatted.
-#' @param sigdig : An optional vector of significant digits.
+#' @param x A data frame with numeric variables to be formatted.
+#' @param sigdig An optional vector of significant digits.
+#' @param ambig_0_adj An optional logical to adjust the format
+#'     to remove ambiguous trailing zeros. If TRUE, the decimal point is
+#'     moved three places to the left. Default is FALSE.
 #'
-#' @return The returned object is a data frame with numeric variables converted
-#'   to formatted strings bounded by \code{"$...$"} and interpreted by R
-#'   Markdown as an equation.
+#' @return A data frame with numeric variables converted
+#'   to formatted strings bounded by \code{"$...$"}.
 #'
 #' @examples
-#' # create test input arguments
-#' set.seed(20161221)
-#' n <- 5
-#' a <- sample(letters, n)
-#' b <- sample(letters, n)
-#' w <- runif(n, min =  -5, max =  50) * 1e+5
-#' y <- runif(n, min = -25, max =  40) / 1e+3
-#' z <- runif(n, min =  -5, max = 100)
-#' x <- data.frame(z, b, y, a, w, stringsAsFactors = FALSE)
-#'
-#' # format different objects
-#' print(x)
+#' # Factors unaffected; ambiguous trailing zeros.
+#' data("CO2")
+#' x <- head(CO2, n = 5L)
 #' format_engr(x)
+#' format_engr(x, sigdig = c(0, 3))
+#' format_engr(x, sigdig = c(3, 3), ambig_0_adj = TRUE)
+#'
+#' # Ordered factor unaffected; ambiguous trailing zeros.
+#' data("DNase")
+#' x <- tail(DNase, n = 5L)
+#' format_engr(x)
+#' format_engr(x, sigdig = c(6, 3))
+#' format_engr(x, sigdig = c(6, 3), ambig_0_adj = TRUE)
+#'
+#' # Integers returned unchanged but delimited; NA unchanged.
+#' data("airquality")
+#' x <- head(airquality, n = 6L)
 #' format_engr(x, sigdig = 3)
-#' format_engr(x, sigdig = c(3, 4, 5))
-#' format_engr(y, 2)  # numeric vector
-#' format_engr(n, 3)  # numeric scalar
-#'
-#' # using base R data sets
-#' format_engr(DNase[1:10, ], sigdig = 4)
-#' format_engr(mtcars[1:5, 1:5], sigdig = c(3, 0, 0, 0, 3))
-#' format_engr(CO2[1:5,], 3)
-#'
-#' \dontrun{
-#' format_engr(a) # non-numeric, produces an error}
 #'
 #' @export
-format_engr <- function(x, sigdig = NULL) {
-	# if x is scalar or vector, create data frame x$value
-	if (is.atomic(x) & !is.list(x) & is.null(dim(x))) {
-		x <- data.frame(x, stringsAsFactors = FALSE)
-		names(x) <- "value"
-	}
-	stopifnot(is.data.frame(x))
+format_engr <- function(x, sigdig = NULL, ambig_0_adj = FALSE) {
 
-	# to return data frame variables in the same order received
-	orig_names <- names(x)
-	n          <- dim(x)[1]
-	obs        <- as.integer(1:n)
+  # input argument x must be a data frame
+  if (!is.data.frame(x)) {
+    warning("Argument must be a data frame.")
+    return(x)
+  } else {
+    # if already a df, make sure not a tibble (conflict with format)
+    x <- as.data.frame(x)
+  }
 
-	# prepare significant digits
-	if (is.null(sigdig)) sigdig <- 4
-	sigdig <- as.integer(sigdig)
-	stopifnot(sigdig >= 0)
+  # default significant digits
+  if (is.null(sigdig)) {
+    sigdig <- 4L
+  } else if (any(sigdig < 0)) {
+    warning("Significant digits must be 0 or positive integers.")
+    return(x)
+  } else {
+    sigdig <- as.integer(sigdig) # ensure integer
+  }
 
-	# declare variables to address the "no visible binding" check
-	# there may be a better way, but I don't know what it is yet
-	div      <- 0
-	num_sign <- 0
-	num      <- 0
-	num_left <- 0
-	num_str  <- ""
-	output   <- ""
-	pow      <- ""
-	value    <- ""
-	var      <- ""
+  # obtain list of symbolic variable names to recover column order
+  var_name_list <- rlang::syms(names(x))
 
-	# isolate the numeric variables
-	numeric_cols   <- x %>% select_if(is.numeric)
-	m_numeric_cols <- dim(numeric_cols)[2]
-	numeric_cols   <- mutate(numeric_cols, obs = obs)
-	stopifnot(m_numeric_cols > 0)
+  # separate columns into three groups: double, numerical integer, others
+  # double will be engr formatted, integer delimited $...$, others as-is
+  # if no columns are of type double, return with warning
 
-	# match sigdig array to numeric data
-	sigfig_length <- length(sigdig)
-	if (sigfig_length == 1) {
-		sigdig <- rep(sigdig, m_numeric_cols)
-	} else if (sigfig_length > 1 & sigfig_length < m_numeric_cols) {
-		sigdig <- c(sigdig, rep(4, m_numeric_cols - sigfig_length))
-	} else if (sigfig_length > m_numeric_cols) {
-		sigdig <- sigdig[1:m_numeric_cols]
-	} else {
-		sigdig <- sigdig
-	}
-	sigdig <- as.integer(sigdig)
+  double_TF <- purrr::map(x, rlang::is_double) %>% unlist()
+  integer_TF <- purrr::map(x, rlang::is_integer) %>% unlist()
+  ordered_TF <- purrr::map(x, is.ordered) %>% unlist()
+  factor_TF <- purrr::map(x, is.factor) %>% unlist()
+  charac_TF <- purrr::map(x, rlang::is_character) %>% unlist()
+  date_TF <- purrr::map(x, lubridate::is.Date) %>% unlist()
 
-	# format the numeric variables, omitting any with sigdig = 0
-	if (sum(sigdig) > 0) {
-		numeric_cols <- format(numeric_cols, scientific = TRUE) %>%
-			gather(var, value, 1:m_numeric_cols) %>%
-			separate(value, c("num",  "pow"), "e", remove = FALSE) %>%
-			mutate(sigdig = rep(sigdig, each = n)) %>%
-			filter(sigdig > 0) %>%
-			mutate(num = as.numeric(num)) %>%
-			mutate(pow = as.numeric(pow)) %>%
-			mutate(div = pow %% 3) %>%
-			mutate(num = num * 10 ^ div) %>%
-			mutate(pow = round(pow - div, 0)) %>%
-			mutate(num = signif(num, sigdig)) %>%
-			mutate(num_sign = sign(num)) %>%
-			mutate(num_str = sprintf(paste0("%.", sigdig, "f"), abs(num))) %>%
-			separate(num_str, c("num_left", "num_right"), "\\.", remove = FALSE) %>%
-			mutate(num_str = if_else(str_length(num_left) >= sigdig
-															 , num_left
-															 , str_trunc(num_str, sigdig + 1, "right", "")))
+  # double but not Date
+  yes_double <- double_TF & !ordered_TF & !integer_TF &
+    !factor_TF & !charac_TF & !date_TF
+  # integers but not factors
+  yes_integer <- integer_TF & !double_TF & !ordered_TF &
+    !factor_TF & !charac_TF & !date_TF
+  # everything else
+  yes_others <- !yes_double & !yes_integer
 
-		# adjust coefficient and exponent when significance of trailing zero is ambiguous
-		sel <- as.numeric(numeric_cols$num_right) == 0 & str_detect(numeric_cols$num_left, "0$") & as.numeric(numeric_cols$num_left)/1000 >= 0.1
-		numeric_cols$num_str[sel] <- sprintf(paste0("%.", numeric_cols$sigdig[sel], "f"), as.numeric(numeric_cols$num_str[sel]) / 1000)
-		numeric_cols$pow[sel] <- numeric_cols$pow[sel] + 3
+  if (!any(yes_double)) {
+    warning("No columns are of type double")
+    return(x)
+  }
 
-		# continue formatting (str_replace requires the replacement to be a string)
-		numeric_cols <- numeric_cols %>%
-			mutate(num_str = if_else(num_sign < 0, str_c("-", num_str), num_str)) %>%
-			mutate(output  = if_else(pow == 0, "$nn$"
-															 , str_replace(paste("${nn}\\times 10^{pp}$"), "pp", as.character(pow)))) %>%
-			mutate(output = str_replace(output, "nn", num_str)) %>%
-			select(obs, var, output) %>%
-			spread(var, output) %>%
-			mutate(obs = as.integer(obs))
-	} else {
-		numeric_cols <- select(numeric_cols, obs)
-	} # end of engr-format section
+  # sort columns of input into three mutually exclusive data frames
+  double_col <- x[, yes_double, drop = FALSE]
+  integer_col <- x[, yes_integer, drop = FALSE]
+  all_other_col <- x[, yes_others, drop = FALSE]
 
-	# separate the zero sig dig cols if any
-	non_numeric_logic <- !(names(x) %in% names(numeric_cols))
-	non_numeric_cols  <- select(x, which(non_numeric_logic))
+  # sigdig vector length = 1
+  m_double_col <- ncol(double_col)
+  if (length(sigdig) == 1) {
+    sigdig <- rep(sigdig, m_double_col)
+  }
+  # or length must = N numeric col
+  if (length(sigdig) != m_double_col) {
+    warning(paste(
+      "Incorrect length sigdif vector. Applies only to numeric class 'double'."
+    ))
+    return(x)
+  }
 
-	zero_sig_cols   <- select_if(non_numeric_cols, is.numeric)
-	m_zero_sig_cols <- dim(zero_sig_cols)[2]
-	zero_sig_cols   <- mutate(zero_sig_cols, obs = obs)
+  # separate cols to be engr formatted
+  numeric_engr <- double_col[, sigdig != 0, drop = FALSE]
+  sigdig_engr <- sigdig[sigdig > 0]
+  m_numeric_engr <- ncol(numeric_engr)
 
-	if (m_zero_sig_cols > 0) {
-		zero_sig_cols <- zero_sig_cols %>%
-			gather(var, value, 1:m_zero_sig_cols) %>%
-			mutate(value = paste0("$", value, "$")) %>%
-			spread(var, value)
-	}
+  # join as-is double (0 sig dig) with integers
+  numeric_as_is <- double_col[, sigdig == 0, drop = FALSE]
+  numeric_as_is <- bind_cols(numeric_as_is, integer_col)
+  m_numeric_as_is <- ncol(numeric_as_is)
 
-	non_numeric_logic0 <- !(names(non_numeric_cols) %in% names(zero_sig_cols))
-	non_numeric_cols  <- select(non_numeric_cols, which(non_numeric_logic0)) %>%
-		mutate(obs = obs)
+  # for rejoining later, add observation numbers to each df
+  obs_add <- function(x) {
+    x <- dplyr::mutate(x, observ_index = 1:n())
+  }
+  numeric_as_is <- obs_add(numeric_as_is)
+  numeric_engr <- obs_add(numeric_engr)
+  all_other_col <- obs_add(all_other_col)
 
-	# rejoin the parts (each part has at least the obs column)
-	df <- left_join(numeric_cols, zero_sig_cols, by = "obs")
-	df <- left_join(df, non_numeric_cols, by = "obs")
-	df <- select(df, -obs)
+  # format the numeric variables for all with sigdig > 0
+  if (m_numeric_engr > 0) {
 
-	x <- select(df, match(orig_names, names(df)))
+    # separate significand from the power of ten
+    numeric_engr <- format(numeric_engr, scientific = TRUE) %>%
+      tidyr::gather(var, value, 1:m_numeric_engr) %>%
+      dplyr::mutate(observ_index = as.double(observ_index)) %>%
+      mutate(value = ifelse(
+        is.na(value),
+        NA_character_,
+        as.character(value)
+      )) %>%
+      # is it possible that separating by "e" varies by platform?
+      # fill = right helps with an NA condition
+      tidyr::separate(value, c("num", "pow"), "e",
+        remove = FALSE, fill = "right"
+      ) %>%
+      # remove blanks around NA if any
+      mutate(num = str_trim(num, side = "both")) %>%
+      mutate(pow = str_trim(pow, side = "both")) %>%
+      # convert any NA string to NA, otherwise double
+      mutate(num = ifelse(!is.na(num), as.numeric(num), NA)) %>%
+      mutate(pow = ifelse(!is.na(pow), as.numeric(pow), NA))
 
-	# return the df
-	return(x)
+    # assign nonzero signif digits
+    numeric_engr <- numeric_engr %>%
+      dplyr::mutate(dig = rep(sigdig_engr, each = max(observ_index)))
+
+    # power of 10 in multiples of 3 (pow mod 3)
+    numeric_engr <- numeric_engr %>%
+      mutate(div = pow %% 3) %>%
+      mutate(num = num * 10^div) %>%
+      mutate(pow = round(pow - div, 0))
+
+    # construct strings in batches by sigdig
+    collect <- numeric_engr[FALSE, ]
+    collect$num_str <- character()
+
+    for (jj in unique(sigdig_engr)) {
+      numeric_string <- numeric_engr %>%
+        filter(dig == jj) %>%
+        # flag = "#" ensures keeping trailing zeros
+        mutate(num_str = formatC(
+          signif(num, digits = jj),
+          digits = jj,
+          format = "fg",
+          flag = "#"
+        )) %>%
+        # delete decimal if it is the last character in the string
+        mutate(num_str = str_replace(num_str, "\\.$", ""))
+
+      # identify ambiguous trailing zeros: ends in 0 and no decimal point
+      sel <- stringr::str_detect(numeric_string$num_str, "\\.")
+      sel <- !sel & str_detect(numeric_string$num_str, "0$")
+
+      # operate on selected num_str and pow only
+      if (any(sel) & !is.null(ambig_0_adj)) {
+        if (ambig_0_adj) {
+          numeric_string$pow[sel] <- numeric_string$pow[sel] + 3
+          temp_num <- as.numeric(numeric_string$num_str[sel]) / 1000
+          numeric_string$num_str[sel] <- formatC(
+            signif(temp_num, digits = jj),
+            digits = jj,
+            format = "fg",
+            flag = "#"
+          )
+        }
+      }
+      collect <- rbind(collect, numeric_string)
+    }
+    numeric_engr <- collect
+
+    # framework for printing as math with $...$
+    numeric_engr <- numeric_engr %>%
+      mutate(output = dplyr::if_else(
+        pow == 0,
+        "$nn$",
+        paste("${nn}\\times 10^{pp}$")
+      ))
+
+    # place numbers and power of ten in string
+    numeric_engr <- numeric_engr %>%
+      mutate(output = stringr::str_replace(output, "nn", num_str)) %>%
+      mutate(output = stringr::str_replace(output, "pp", as.character(pow)))
+
+    # reformat wide to match input
+    numeric_engr <- numeric_engr %>%
+      dplyr::select(observ_index, var, output) %>%
+      tidyr::spread(var, output)
+  }
+
+  # place numeric_as_is in $...$, if any
+  if (m_numeric_as_is > 0) {
+    observ_index <- numeric_as_is %>% select(observ_index)
+    num_col <- numeric_as_is %>% select(-observ_index)
+
+    for (jj in 1:m_numeric_as_is) {
+      num_col[, jj] <- str_c("$", num_col[, jj], "$")
+    }
+
+    numeric_as_is <- bind_cols(num_col, observ_index)
+  }
+
+  # rejoin the parts (each part has at least the observ_index column)
+  x <- dplyr::left_join(all_other_col, numeric_as_is, by = "observ_index")
+  x <- dplyr::left_join(x, numeric_engr, by = "observ_index")
+  x <- dplyr::select(x, !!!var_name_list)
 }
-
+"format_engr"

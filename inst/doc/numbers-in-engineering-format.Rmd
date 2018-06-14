@@ -1,86 +1,178 @@
 ---
 title: "Numbers in engineering format"
-author: "Richard Layton"
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Numbers in engineering format}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
+
+```{r setup, echo = FALSE, message = FALSE}
+knitr::opts_knit$set(root.dir = "../")
+knitr::opts_chunk$set(
+  echo = TRUE, # varies from one Rmd to another
+  message = FALSE,
+  warning = FALSE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  purl = FALSE,
+  fig.width = 6,
+  fig.asp = 1 / 1.6,
+  out.width = "70%",
+  fig.align = "center",
+  fig.path = "../man/figures/engr-format-"
+)
+knitr::knit_hooks$set(inline = function(x) {
+  if (!is.numeric(x)) {
+    x
+  } else if (x >= 10000) {
+    prettyNum(round(x, 2), big.mark = ",")
+  } else {
+    prettyNum(round(x, 2))
+  }
+})
+options(tibble.print_min = 8L, tibble.print_max = 8L)
+```
+
+## Introduction
+
+Packages used in this vignette. 
+
+```{r message = FALSE}
+library(tidyverse)
+library(knitr)
+library(docxtools)
+```
 
 This vignette demonstrates the use of two functions from the *docxtools* package: 
 
 - `format_engr()` for formatting numbers in engineering notation  
-- `align_pander()` for aligning table columns using a "simple" pander table style 
-
-## format_engr()
+- `align_pander()` for aligning table columns using a simple pander table style 
 
 The primary goal of `format_engr()` is to present numeric variables in a data frame in *engineering format*, that is, scientific notation with exponents that are multiples of 3. Compare: 
 
-| Syntax |Expression|
-|--------|----------|
-|conventional computer syntax |$1.011e+5$         | 
-|mathematical syntax          |$1.011\times10^{5}$|
-|engineering format           |$101.1\times10^{3}$|
-
-This example uses a small temperature-pressure data set to compute air density and display the results in a table. Density is computed using the ideal gas law, $\rho = p / (RT)$. 
+|syntax         |expression           |
+|---------------|---------------------|
+|computer       |$1.011E+5$           | 
+|mathematical   |$1.011\times10^{5}$  |
+|engineering    |$101.1\times10^{3}$  |
 
 
-Start by loading packages, 
+## format_engr()
 
-
-```{r}
-library(knitr)
-opts_knit$set(root.dir = "../")
-suppressPackageStartupMessages(library(dplyr))
-library(docxtools)
-```
-
-Create some data for the example,  
+This example uses a small data set, `density`, included with docxtools, with temperature in K, pressure in Pa, the gas constant in J kg^-1^K^-1^, and density in kg m^-3^.   
 
 ```{r}
-# temperature in K
-T_K  <- c(294.05, 294.15, 294.65, 293.35, 293.85)
-# convert pressure from hPa to Pa
-p_Pa <- c(1011, 1010, 1011, 1010, 1011) * 100
-# gas constant in J / (kg K)
-R    <- 287
-# density in kg / m^3
-density_data <- data.frame(T_K, p_Pa, R)
+density
 ```
 
-Compute air density for each observation,  
+Four of the variables are numeric. The `date` variable is of type "double" but class "Date", so it is not reformatted. 
 
 ```{r}
-density_data <-	mutate(density_data, density = p_Pa / (R * T_K))
-knitr::kable(density_data)
+map_chr(density, class)
+map_chr(density, typeof)
 ```
 
-The first argument of `format_engr()` is the data frame, the second is the array of significant digits in column order.  
+Usage is `format_engr(x, sigdig = NULL, ambig_0_adj = FALSE)`. The function returns a data frame with all numeric values reformatted as character strings in engineering format with math delimiters `$...$`.  
 
 ```{r}
-engr_density_data <- format_engr(density_data, sigdig = c(5, 4, 0, 5))
+density_engr <- format_engr(density)
+density_engr
 ```
 
-Data frame values are returned as character strings with math formatting. By setting `sigdig = 0` for **R**, the third column will be displayed in its  original form. 
-
-```{r, collapse = TRUE}
-str(engr_density_data)
-```
-
-The math formatting is applied when the data frame is printed in the output document.   
+The formerly numeric variables are now characters.  Non-numeric variables are returned unaltered.
 
 ```{r}
-knitr::kable(engr_density_data)
+map_chr(density_engr, class)
+```
+
+The math formatting is applied when the data frame is printed in the output document.  For example, we can use `knitr::kable()` to print the formatted data.  
+
+```{r}
+kable(density_engr)
+```
+
+The function is compatible with the pipe operator. 
+
+```{r}
+density_engr <- density %>%
+  format_engr()
+kable(density_engr)
 ```
 
 Comments: 
 
-- scientific notation is omitted when the exponent is 0, 1, or 2, hence temperature **T_K** is reported with 5 digits but without scientific notation 
-- pressure data **p_Pa** is correctly shown in engineering format 
-- trailing zeros are significant 
+- as illustrated by the temperature column, scientific notation is omitted when the exponent is 0, 1, or 2 
+- trailing zeros after a decimal point are significant 
 
+## Significant digits
+
+`format_engr()` has three arguments: 
+
+- `x`, a data frame with at least one numerical variable. 
+- `sigdig`, an optional vector of significant digits. Default is 4. 
+- `ambig_0_adj`, an optional logical to adjust the notation in the event of ambiguous trailing zeros. Default is FALSE. 
+
+The `sigdig` argument can be a single value, applied to all numeric columns. 
+
+```{r}
+density_engr <- format_engr(density, sigdig = 3)
+kable(density_engr)
+```
+
+Alternatively, significant digits can be assigned to every numeric column. A zero returns the variable in its original form.   
+
+```{r}
+density_engr <- format_engr(density, sigdig = c(5, 4, 0, 5))
+kable(density_engr)
+```
+
+## Ambiguous trailing zeros
+
+Subset the data to look at just the numerical variables. 
+
+```{r}
+x <- density %>%
+  select(T_K, p_Pa, R, density)
+```
+
+Print the data with incrementally decreasing significant digits. 
+
+```{r}
+kable(format_engr(x, sigdig = 4), caption = "4 digits")
+```
+
+Three digits creates no ambiguity. 
+
+```{r}
+kable(format_engr(x, sigdig = 3), caption = "3 digits")
+```
+
+With 2 digits, we have three columns with ambiguous trailing zeros. 
+
+```{r}
+kable(format_engr(x, sigdig = 2), caption = "2 digits")
+```
+
+By setting the `ambig_0_adj` argument to TRUE, scientific notation is used to remove the ambiguity. 
+
+```{r}
+kable(format_engr(x, sigdig = 2, ambig_0_adj = TRUE), caption = "Removing ambiguity")
+```
+
+The ambiguous trailing zero adjustment is applied only to those variables for which the condition exists. For example, if the pressure were known to only 2 digits, it is the only variable with ambiguous trailing zeros. 
+
+```{r}
+kable(format_engr(x, sigdig = c(4, 2, 0, 3), ambig_0_adj = FALSE))
+```
+
+With `ambig_0_adj = TRUE`, only the pressure variable has a reformatted power of ten. 
+
+
+```{r}
+kable(format_engr(x, sigdig = c(4, 2, 0, 3), ambig_0_adj = TRUE))
+```
 
 ## align_pander() 
 
@@ -91,146 +183,31 @@ This function uses `pander()` to print a table and `panderOptions('table.alignme
 - `caption` is an optional string used as the `pander()` caption argument 
 
 ```{r}
-align_pander(engr_density_data, align_idx = "cccc")
+align_pander(density_engr)
 ```
 
-Finally, the heading can be edited for presentation. The heading row, like the numeric variables, are formatted in R Markdown math format.
+Finally, the heading can be edited for presentation. 
 
 ```{r}
-names(engr_density_data) <- c("$T\\text{ (K)}$"
-	, "$p\\text{ (Pa)}$"
-	, "$R\\text{ (J kg}^{-1}\\text{ K}^{-1}\\text{)}$"
-	, "$\\rho\\text{ (kg/m}^{3}\\text{)}$"
-	)
+names(density_engr) <- c(
+  "Date",
+  "Trial",
+  "Temp (K)",
+  "Press (Pa)",
+  "R (J kg^-1^K^-1^)",
+  "$\\rho$ (kg/m^3^)"
+)
 ```
 
-- backslashes have to be escaped, hence `\\text{}` and `\\rho` 
-- `\text{}` produces "roman" (non-italic) type inside the math environment 
+- backslashes have to be escaped, hence `\\rho` 
+- superscripts like m^3^ in R Markdown are produced with `m^3^`
+
 
 ```{r}
-align_pander(engr_density_data, "cccc", caption = "Air density measurements")
+align_pander(density_engr, "lccccc", caption = "Air density measurements")
 ```
 
-
-
-
-
-
-## non-numeric variables  
-
-Create some alphanumeric test data, 
-
-```{r}
-# create test input arguments
-set.seed(20161221)
-n  <- 5
-a  <- sample(letters, n)
-b  <- sample(letters, n)
-x  <- runif(n, min =  -5, max =  50) * 1e+5
-y  <- runif(n, min = -25, max =  40) / 1e+3
-z  <- runif(n, min =  -5, max = 100)
-alpha_num <- data.frame(z, b, y, a, x, stringsAsFactors = FALSE)
-```
-
-Format the entire data frame with the default 4 significant digits. 
-
-```{r}
-engr_alpha_num <- format_engr(alpha_num)
-align_pander(engr_alpha_num, "rcrcr")
-```
-
-- character variables `b` and `a` are unaffected by `engr_format()`  
-- coefficients have floating decimal points 
-
-Variables can be re-ordered in the usual way, e.g., 
-
-```{r}
-alpha_num <- select(alpha_num, a, b, x, y, z)
-engr_alpha_num <- format_engr(alpha_num)
-align_pander(engr_alpha_num, "ccrrr")
-```
-
-## significant zeros 
-
-Leading zeros are not significant. 
-
-Trailing zeros generally should be significant. For example, isolate a number from the `y` column:  
-
-```{r collapse = TRUE}
-y2 <- alpha_num$y[2]
-y2
-```
-
-Formatting `y2` with different significant digits using `format_engr(y2, sigdig)` yields the table below. With 3 digits, `y2` has 3 unambiguous significant digits. However, reducing the number of digits to 2 would produce a coefficient of $350$ with an ambiguous zero before the decimal point. In such cases, `format_engr()` changes the exponent to produce `r format_engr(y2, 2)` with two unambiguous significant digits.   
-
-|`sigdig`|$y_2$|
-|--------|----------|
-|   4    |`r format_engr(y2, 4)`|
-|   3    |`r format_engr(y2, 3)`|
-|   2    |`r format_engr(y2, 2)`|
-|   1    |`r format_engr(y2, 1)`|
-
-*Exceptions to the significant trailing zero rule.* Consider $z_2$ from the data frame, 
-
-```{r collapse = TRUE}
-z2 <- alpha_num$z[2]
-z2
-```
-
-For numbers like `z2` that in scientific notation would have exponents = 0, 1, or 2, `format_engr()` foregoes powers of ten notation.  
-
-
-|`sigdig`|$z_2$|
-|--------|----------|
-|   4    |`r format_engr(z2, 4)`|
-|   3    |`r format_engr(z2, 3)`|
-|   2    |`r format_engr(z2, 2)`|
-|   1    |`r format_engr(z2, 1)`|
-
-As we reduce the number of significant digits, we can eventually obtain a trailing zero whose significance is ambiguous, as in $z_2 =$ `r format_engr(z2, 1)`. In such cases, `format_engr()` leaves the ambiguous significant zero instead of imposing scientific notation that the audience might find distracting.
-
-## scalars and vectors are returned as data frames 
-
-The preferred input to `format_engr()` is a data frame. If the input is a numeric vector, it will be formatted and returned as a data frame with the variable name `value`. 
-
-For example,  using `y2` again, 
-
-```{r, collapse = TRUE}
-str(y2)
-```
-
-Now formatting the number returns a data frame with one row and column. 
-
-```{r, collapse = TRUE}
-engr_y2 <- format_engr(y2, 4)
-str(engr_y2)
-```
-
-which can be used in an inline code chunk, e.g., 
-
-    $y_2 =$ `r engr_y2$value`
-
-to produce $y_2 =$ `r engr_y2$value`. 
-
-
-A numeric vector is also returned as a data frame. 
-
-```{r, collapse = TRUE}
-# the x array
-cat(x, sep = "\n")
-class(x)
-
-# formatted 
-engr_x <- format_engr(x, 3)
-class(engr_x)
-engr_x
-```
-
-The input to `format_engr()` must have at least one numeric variable, or an error is thrown, e.g., running `format_engr(a)` produces the error 
-
-`Error: m_numeric_cols > 0 is not TRUE Execution halted`. 
-
-## conclusion 
+## Conclusion 
 
 These two functions provide the means for consistently rendering numbers with the desired number of significant digits, including trailing zeros, and align them in output tables without affecting character data in the same data frame. 
 
