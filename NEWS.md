@@ -1,3 +1,9 @@
+## docxtools 0.1.3 (2018-06-19)
+
+- Updated tests of `put_axes()` for compatibility with latest version of ggplot2 
+
+
+
 
 ## docxtools 0.1.2 (2018-06-14)
 
