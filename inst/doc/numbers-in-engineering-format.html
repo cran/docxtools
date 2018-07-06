@@ -872,60 +872,6 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li><code>caption</code> is an optional string used as the <code>pander()</code> caption argument</li>
 </ul>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw">align_pander</span>(density_engr)</a></code></pre></div>
-<table>
-<thead>
-<tr class="header">
-<th align="left">date</th>
-<th align="left">trial</th>
-<th align="left">T_K</th>
-<th align="left">p_Pa</th>
-<th align="left">R</th>
-<th align="left">density</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">2018-06-12</td>
-<td align="left">a</td>
-<td align="left"><span class="math inline">\(294.05\)</span></td>
-<td align="left"><span class="math inline">\({101.1}\times 10^{3}\)</span></td>
-<td align="left"><span class="math inline">\(287\)</span></td>
-<td align="left"><span class="math inline">\(1.1980\)</span></td>
-</tr>
-<tr class="even">
-<td align="left">2018-06-13</td>
-<td align="left">b</td>
-<td align="left"><span class="math inline">\(294.15\)</span></td>
-<td align="left"><span class="math inline">\({101.0}\times 10^{3}\)</span></td>
-<td align="left"><span class="math inline">\(287\)</span></td>
-<td align="left"><span class="math inline">\(1.1964\)</span></td>
-</tr>
-<tr class="odd">
-<td align="left">2018-06-14</td>
-<td align="left">c</td>
-<td align="left"><span class="math inline">\(294.65\)</span></td>
-<td align="left"><span class="math inline">\({101.1}\times 10^{3}\)</span></td>
-<td align="left"><span class="math inline">\(287\)</span></td>
-<td align="left"><span class="math inline">\(1.1955\)</span></td>
-</tr>
-<tr class="even">
-<td align="left">2018-06-15</td>
-<td align="left">d</td>
-<td align="left"><span class="math inline">\(293.35\)</span></td>
-<td align="left"><span class="math inline">\({101.0}\times 10^{3}\)</span></td>
-<td align="left"><span class="math inline">\(287\)</span></td>
-<td align="left"><span class="math inline">\(1.1996\)</span></td>
-</tr>
-<tr class="odd">
-<td align="left">2018-06-16</td>
-<td align="left">e</td>
-<td align="left"><span class="math inline">\(293.85\)</span></td>
-<td align="left"><span class="math inline">\({101.1}\times 10^{3}\)</span></td>
-<td align="left"><span class="math inline">\(287\)</span></td>
-<td align="left"><span class="math inline">\(1.1988\)</span></td>
-</tr>
-</tbody>
-</table>
 <p>Finally, the heading can be edited for presentation.</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw">names</span>(density_engr) &lt;-<span class="st"> </span><span class="kw">c</span>(</a>
 <a class="sourceLine" id="cb18-2" data-line-number="2">  <span class="st">&quot;Date&quot;</span>,</a>
@@ -940,61 +886,6 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li>superscripts like m<sup>3</sup> in R Markdown are produced with <code>m^3^</code></li>
 </ul>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="kw">align_pander</span>(density_engr, <span class="st">&quot;lccccc&quot;</span>, <span class="dt">caption =</span> <span class="st">&quot;Air density measurements&quot;</span>)</a></code></pre></div>
-<table>
-<caption>Air density measurements</caption>
-<thead>
-<tr class="header">
-<th align="left">Date</th>
-<th align="center">Trial</th>
-<th align="center">Temp (K)</th>
-<th align="center">Press (Pa)</th>
-<th align="center">R (J kg<sup>-1</sup>K<sup>-1</sup>)</th>
-<th align="center"><span class="math inline">\(\rho\)</span> (kg/m<sup>3</sup>)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">2018-06-12</td>
-<td align="center">a</td>
-<td align="center"><span class="math inline">\(294.05\)</span></td>
-<td align="center"><span class="math inline">\({101.1}\times 10^{3}\)</span></td>
-<td align="center"><span class="math inline">\(287\)</span></td>
-<td align="center"><span class="math inline">\(1.1980\)</span></td>
-</tr>
-<tr class="even">
-<td align="left">2018-06-13</td>
-<td align="center">b</td>
-<td align="center"><span class="math inline">\(294.15\)</span></td>
-<td align="center"><span class="math inline">\({101.0}\times 10^{3}\)</span></td>
-<td align="center"><span class="math inline">\(287\)</span></td>
-<td align="center"><span class="math inline">\(1.1964\)</span></td>
-</tr>
-<tr class="odd">
-<td align="left">2018-06-14</td>
-<td align="center">c</td>
-<td align="center"><span class="math inline">\(294.65\)</span></td>
-<td align="center"><span class="math inline">\({101.1}\times 10^{3}\)</span></td>
-<td align="center"><span class="math inline">\(287\)</span></td>
-<td align="center"><span class="math inline">\(1.1955\)</span></td>
-</tr>
-<tr class="even">
-<td align="left">2018-06-15</td>
-<td align="center">d</td>
-<td align="center"><span class="math inline">\(293.35\)</span></td>
-<td align="center"><span class="math inline">\({101.0}\times 10^{3}\)</span></td>
-<td align="center"><span class="math inline">\(287\)</span></td>
-<td align="center"><span class="math inline">\(1.1996\)</span></td>
-</tr>
-<tr class="odd">
-<td align="left">2018-06-16</td>
-<td align="center">e</td>
-<td align="center"><span class="math inline">\(293.85\)</span></td>
-<td align="center"><span class="math inline">\({101.1}\times 10^{3}\)</span></td>
-<td align="center"><span class="math inline">\(287\)</span></td>
-<td align="center"><span class="math inline">\(1.1988\)</span></td>
-</tr>
-</tbody>
-</table>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>

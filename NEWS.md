@@ -1,9 +1,31 @@
+<!-- major . minor . patch . dev -->
+<!-- MAJOR version when you make incompatible API changes -->
+<!-- MINOR version add functionality in a backwards-compatible manner -->
+<!-- PATCH version backwards-compatible bug fixes -->
+
+
+
+
+
+
+## docxtools 0.2.0 (2018-07-05)
+
+This update removes the dependency on CRAN package pander, now scheduled for archival on 2018--07--19.  
+
+### Deprecated
+
+- `align_pander()` deprecated, suggest using `knitr::kable()` instead
+
+### Minor improvements
+
+- Switched pipe dependency from magrittr to dplyr 
+
+
+
+
 ## docxtools 0.1.3 (2018-06-19)
 
-- Updated tests of `put_axes()` for compatibility with latest version of ggplot2 
-
-
-
+- Updated unit testing for compatibility with latest version of ggplot2 
 
 ## docxtools 0.1.2 (2018-06-14)
 

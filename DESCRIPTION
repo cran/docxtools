@@ -1,6 +1,6 @@
 Package: docxtools
 Title: Tools for R Markdown to Docx Documents
-Version: 0.1.3
+Version: 0.2.0
 Language: en-US
 Authors@R: c(
     person("Richard", "Layton", email = "graphdoctor@gmail.com", role = c("aut", "cre"))
@@ -13,16 +13,15 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: TRUE
 RoxygenNote: 6.0.1
-Imports: dplyr, ggplot2, lubridate, magrittr, pander, purrr, rlang,
-        stringr, tidyr
+Imports: dplyr, ggplot2, lubridate, purrr, rlang, stringr, tidyr
 Suggests: covr, knitr, rmarkdown, rprojroot, testthat
 VignetteBuilder: knitr
 URL: https://CRAN.R-project.org/package=docxtools,
-        https://github.com/graphdr/docxtools
+        https://graphdr.github.io/docxtools
 BugReports: https://github.com/graphdr/docxtools/issues
 NeedsCompilation: no
-Packaged: 2018-06-19 20:44:30 UTC; layton
+Packaged: 2018-07-06 06:43:43 UTC; layton
 Author: Richard Layton [aut, cre]
 Maintainer: Richard Layton <graphdoctor@gmail.com>
 Repository: CRAN
-Date/Publication: 2018-06-20 05:18:07 UTC
+Date/Publication: 2018-07-06 07:00:03 UTC
