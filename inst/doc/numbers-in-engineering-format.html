@@ -17,7 +17,7 @@
 
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
+<style type="text/css" data-origin="pandoc">
 a.sourceLine { display: inline-block; line-height: 1.25; }
 a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
 a.sourceLine:empty { height: 1.2em; position: absolute; }
@@ -81,7 +81,29 @@ code span.st { color: #4070a0; } /* String */
 code span.va { color: #19177c; } /* Variable */
 code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
 </style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 
@@ -283,9 +305,9 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>Packages used in this vignette.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(tidyverse)</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">library</span>(knitr)</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">library</span>(docxtools)</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(<span class="st">&quot;dplyr&quot;</span>)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">library</span>(<span class="st">&quot;knitr&quot;</span>)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">library</span>(<span class="st">&quot;docxtools&quot;</span>)</a></code></pre></div>
 <p>This vignette demonstrates the use of two functions from the <em>docxtools</em> package:</p>
 <ul>
 <li><code>format_engr()</code> for formatting numbers in engineering notation<br />
@@ -328,11 +350,9 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb2-7" data-line-number="7"><span class="co">#&gt; 5 2018-06-16     e 293.85 101100 287 1.198791</span></a></code></pre></div>
 <p>Four of the variables are numeric. The <code>date</code> variable is of type “double” but class “Date”, so it is not reformatted.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">map_chr</span>(density, class)</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="co">#&gt;        date       trial         T_K        p_Pa           R     density </span></a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">#&gt;      &quot;Date&quot; &quot;character&quot;   &quot;numeric&quot;   &quot;numeric&quot;   &quot;numeric&quot;   &quot;numeric&quot;</span></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="kw">map_chr</span>(density, typeof)</a>
-<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="co">#&gt;        date       trial         T_K        p_Pa           R     density </span></a>
-<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="co">#&gt;    &quot;double&quot; &quot;character&quot;    &quot;double&quot;    &quot;double&quot;    &quot;double&quot;    &quot;double&quot;</span></a></code></pre></div>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="co">#&gt; Error in map_chr(density, class): could not find function &quot;map_chr&quot;</span></a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="kw">map_chr</span>(density, typeof)</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="co">#&gt; Error in map_chr(density, typeof): could not find function &quot;map_chr&quot;</span></a></code></pre></div>
 <p>Usage is <code>format_engr(x, sigdig = NULL, ambig_0_adj = FALSE)</code>. The function returns a data frame with all numeric values reformatted as character strings in engineering format with math delimiters <code>$...$</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">density_engr &lt;-<span class="st"> </span><span class="kw">format_engr</span>(density)</a>
 <a class="sourceLine" id="cb4-2" data-line-number="2">density_engr</a>
@@ -344,8 +364,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb4-8" data-line-number="8"><span class="co">#&gt; 5 2018-06-16     e $293.8$ ${101.1}\\times 10^{3}$ $287.0$ $1.199$</span></a></code></pre></div>
 <p>The formerly numeric variables are now characters. Non-numeric variables are returned unaltered.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">map_chr</span>(density_engr, class)</a>
-<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="co">#&gt;        date       trial         T_K        p_Pa           R     density </span></a>
-<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="co">#&gt;      &quot;Date&quot; &quot;character&quot; &quot;character&quot; &quot;character&quot; &quot;character&quot; &quot;character&quot;</span></a></code></pre></div>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="co">#&gt; Error in map_chr(density_engr, class): could not find function &quot;map_chr&quot;</span></a></code></pre></div>
 <p>The math formatting is applied when the data frame is printed in the output document. For example, we can use <code>knitr::kable()</code> to print the formatted data.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">kable</span>(density_engr)</a></code></pre></div>
 <table>
@@ -774,7 +793,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </tr>
 </tbody>
 </table>
-<p>The ambiguous trailing zero adjustment is applied only to those variables for which the condition exists. For example, if the pressure were known to only 2 digits, it is the only variable with ambiguous trailing zeros.</p>
+<p>The ambiguous trailing zero adjustment is applied only to those variables for which the condition exists. For example, consider these data without the adjustment,</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">kable</span>(<span class="kw">format_engr</span>(x, <span class="dt">sigdig =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">3</span>), <span class="dt">ambig_0_adj =</span> <span class="ot">FALSE</span>))</a></code></pre></div>
 <table>
 <thead>
@@ -818,7 +837,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </tr>
 </tbody>
 </table>
-<p>With <code>ambig_0_adj = TRUE</code>, only the pressure variable has a reformatted power of ten.</p>
+<p>The same numbers with <code>ambig_0_adj = TRUE</code>,</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="kw">kable</span>(<span class="kw">format_engr</span>(x, <span class="dt">sigdig =</span> <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">3</span>), <span class="dt">ambig_0_adj =</span> <span class="ot">TRUE</span>))</a></code></pre></div>
 <table>
 <thead>
@@ -862,34 +881,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </tr>
 </tbody>
 </table>
-</div>
-<div id="align_pander" class="section level2">
-<h2>align_pander()</h2>
-<p>This function uses <code>pander()</code> to print a table and <code>panderOptions('table.alignment.default')</code> to align columns. Usage is: <code>align_pander(x, align_idx = NULL, caption = NULL)</code></p>
-<ul>
-<li><code>x</code> is the data frame</li>
-<li><code>align_idx</code> is a string comprised of any combination of “r”, “l”, and “c” The default alignments are numeric right and everything else left</li>
-<li><code>caption</code> is an optional string used as the <code>pander()</code> caption argument</li>
-</ul>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw">align_pander</span>(density_engr)</a></code></pre></div>
-<p>Finally, the heading can be edited for presentation.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw">names</span>(density_engr) &lt;-<span class="st"> </span><span class="kw">c</span>(</a>
-<a class="sourceLine" id="cb18-2" data-line-number="2">  <span class="st">&quot;Date&quot;</span>,</a>
-<a class="sourceLine" id="cb18-3" data-line-number="3">  <span class="st">&quot;Trial&quot;</span>,</a>
-<a class="sourceLine" id="cb18-4" data-line-number="4">  <span class="st">&quot;Temp (K)&quot;</span>,</a>
-<a class="sourceLine" id="cb18-5" data-line-number="5">  <span class="st">&quot;Press (Pa)&quot;</span>,</a>
-<a class="sourceLine" id="cb18-6" data-line-number="6">  <span class="st">&quot;R (J kg^-1^K^-1^)&quot;</span>,</a>
-<a class="sourceLine" id="cb18-7" data-line-number="7">  <span class="st">&quot;$</span><span class="ch">\\</span><span class="st">rho$ (kg/m^3^)&quot;</span></a>
-<a class="sourceLine" id="cb18-8" data-line-number="8">)</a></code></pre></div>
-<ul>
-<li>backslashes have to be escaped, hence <code>\\rho</code></li>
-<li>superscripts like m<sup>3</sup> in R Markdown are produced with <code>m^3^</code></li>
-</ul>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="kw">align_pander</span>(density_engr, <span class="st">&quot;lccccc&quot;</span>, <span class="dt">caption =</span> <span class="st">&quot;Air density measurements&quot;</span>)</a></code></pre></div>
-</div>
-<div id="conclusion" class="section level2">
-<h2>Conclusion</h2>
-<p>These two functions provide the means for consistently rendering numbers with the desired number of significant digits, including trailing zeros, and align them in output tables without affecting character data in the same data frame.</p>
+<p>and only the pressure variable has a reformatted power of ten because it is the only variable that had ambiguous trailing zeros.</p>
 </div>
 
 
