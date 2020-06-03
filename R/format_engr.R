@@ -1,4 +1,5 @@
-#' @importFrom dplyr n mutate filter select left_join if_else bind_cols %>%
+#' @importFrom dplyr row_number mutate filter select left_join if_else
+#' @importFrom dplyr bind_cols %>%
 #' @importFrom tidyr gather separate spread
 #' @importFrom stringr  str_replace str_c str_detect str_trim
 #' @importFrom rlang syms is_double is_integer is_character
@@ -56,14 +57,14 @@ NULL
 #' @examples
 #' # Factors unaffected; ambiguous trailing zeros.
 #' data("CO2")
-#' x <- head(CO2, n = 5L)
+#' x <- as.data.frame(head(CO2, n = 5L))
 #' format_engr(x)
 #' format_engr(x, sigdig = c(0, 3))
 #' format_engr(x, sigdig = c(3, 3), ambig_0_adj = TRUE)
 #'
 #' # Ordered factor unaffected; ambiguous trailing zeros.
 #' data("DNase")
-#' x <- tail(DNase, n = 5L)
+#' x <- as.data.frame(tail(DNase, n = 5L))
 #' format_engr(x)
 #' format_engr(x, sigdig = c(6, 3))
 #' format_engr(x, sigdig = c(6, 3), ambig_0_adj = TRUE)
@@ -102,12 +103,12 @@ format_engr <- function(x, sigdig = NULL, ambig_0_adj = FALSE) {
   # double will be engr formatted, integer delimited $...$, others as-is
   # if no columns are of type double, return with warning
 
-  double_TF <- purrr::map(x, rlang::is_double) %>% unlist()
+  double_TF  <- purrr::map(x, rlang::is_double) %>% unlist()
   integer_TF <- purrr::map(x, rlang::is_integer) %>% unlist()
   ordered_TF <- purrr::map(x, is.ordered) %>% unlist()
-  factor_TF <- purrr::map(x, is.factor) %>% unlist()
-  charac_TF <- purrr::map(x, rlang::is_character) %>% unlist()
-  date_TF <- purrr::map(x, lubridate::is.Date) %>% unlist()
+  factor_TF  <- purrr::map(x, is.factor) %>% unlist()
+  charac_TF  <- purrr::map(x, rlang::is_character) %>% unlist()
+  date_TF    <- purrr::map(x, lubridate::is.Date) %>% unlist()
 
   # double but not Date
   yes_double <- double_TF & !ordered_TF & !integer_TF &
@@ -148,13 +149,14 @@ format_engr <- function(x, sigdig = NULL, ambig_0_adj = FALSE) {
 
   # join as-is double (0 sig dig) with integers
   numeric_as_is <- double_col[, sigdig == 0, drop = FALSE]
-  numeric_as_is <- bind_cols(numeric_as_is, integer_col)
+  numeric_as_is <- dplyr::bind_cols(numeric_as_is, integer_col)
   m_numeric_as_is <- ncol(numeric_as_is)
 
   # for rejoining later, add observation numbers to each df
   obs_add <- function(x) {
-    x <- dplyr::mutate(x, observ_index = 1:dplyr::n())
+    x <- dplyr::mutate(x, observ_index = dplyr::row_number())
   }
+
   numeric_as_is <- obs_add(numeric_as_is)
   numeric_engr <- obs_add(numeric_engr)
   all_other_col <- obs_add(all_other_col)

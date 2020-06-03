@@ -4,6 +4,25 @@
 <!-- PATCH version backwards-compatible bug fixes -->
 
 
+
+
+
+
+
+## docxtools 0.2.2 (2020-06-03)
+
+- Change dplyr::n() to dplyr::row_number() for compatibility with dplyr 1.0.0 to correct errors identified in the CRAN package check results
+- Checked package is compatible with R 4.0.0 
+- Update canonical CRAN URLs
+- Submitted to CRAN
+
+
+## docxtools 0.2.1.9001 (2019-06-11)
+
+- Add CRAN check badge 
+- Add dependency badge 
+
+
 ## docxtools 0.2.1 (2019-02-09)
 
 - Edited vignette to accommodate deprecated function `align_pander()`. Help pages for deprecated functions are available by running `help("docxtools-deprecated")`.

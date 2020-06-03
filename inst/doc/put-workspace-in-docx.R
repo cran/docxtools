@@ -1,5 +1,5 @@
-## ----setup, echo = FALSE, message = FALSE--------------------------------
-knitr::opts_knit$set(root.dir = "../")
+## ----setup, echo = FALSE, message = FALSE-------------------------------------
+# knitr::opts_knit$set(root.dir = "../")
 knitr::opts_chunk$set(
   echo = TRUE, # varies from one Rmd to another
   message = FALSE,
