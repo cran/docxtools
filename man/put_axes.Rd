@@ -4,7 +4,7 @@
 \alias{put_axes}
 \title{Insert a two-dimensional coordinate axes in a document.}
 \usage{
-put_axes(quadrant = NULL, col = NULL, size = NULL)
+put_axes(quadrant = NULL, col = NULL, linewidth = NULL)
 }
 \arguments{
 \item{quadrant}{: The quadrant to plot, 1, 2, 3, 4, or 0 for all four.
@@ -12,7 +12,7 @@ Default is the first quadrant.}
 
 \item{col}{: Line color, default is \code{"gray60"}.}
 
-\item{size}{: Line width, default is \code{0.5}.}
+\item{linewidth}{: Line width, default is \code{0.5}.}
 }
 \value{
 The empty axes.
@@ -25,17 +25,4 @@ scales, no tick marks, no axis labels.
 The size of the figure is determined when printed, e.g., using \code{knitr}
 in an R Markdown script, the figure height in inches is set with the
 \code{fig.height} code chunk option.
-}
-\examples{
-put_axes()
-put_axes(quadrant = 0)
-put_axes(col = "red")
-put_axes(size = 1)
-
-\dontrun{
-# In an R Markdown script
-```{r fig.height = 3.2}
-put_axes()
-```}
-
 }

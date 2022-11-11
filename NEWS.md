@@ -5,9 +5,25 @@
 
 
 
+## docxtools 0.3.0 (2022-11-11)
+
+- Change line width argument from `size` to `linewidth` for compatibility with 2022 late October release of ggplot2. 
+- Add `all_of` to account for change to `tidyr::gather()`    
 
 
 
+## docxtools 0.2.3 (2020-07-03)
+
+- Remove LazyData from Description file per R-devel utilities changes  2021-03-08
+- Remove Travis CI
+
+
+
+
+
+## docxtools 0.2.2.9000 (2020-06-03)
+
+- Added missing purrr package to vignette
 
 ## docxtools 0.2.2 (2020-06-03)
 

@@ -3,11 +3,9 @@
 
 # docxtools <img src="man/figures/logo.png" align="right" />
 
-[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/docxtools)](https://CRAN.R-project.org/package=docxtools)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/docxtools)](https://CRAN.R-project.org/package=docxtools)
 [![cran
 checks](https://cranchecks.info/badges/summary/rhub)](https://cran.r-project.org/web/checks/check_results_rhub.html)
-[![Build
-Status](https://travis-ci.org/graphdr/docxtools.svg?branch=master)](https://travis-ci.org/graphdr/docxtools)
 [![status](https://tinyverse.netlify.com/badge/docxtools)](https://CRAN.R-project.org/package=docxtools)
 [![Coverage
 Status](https://img.shields.io/codecov/c/github/graphdr/docxtools/master.svg)](https://codecov.io/github/graphdr/docxtools?branch=master)
@@ -23,10 +21,10 @@ classroom or workshop setting. These are particularly useful when one
 tries to do one’s own work reproducibly but has collaborators who work
 with Office software exclusively.
 
-  - `format_engr()` to apply engineering format to numbers
+-   `format_engr()` to apply engineering format to numbers
     <!-- - `align_pander()` to print a table of numbers using pander (deprecated) -->
-  - `put_gap()` to create white space in a document
-  - `put_axes()` to place unlabeled axes in a document
+-   `put_gap()` to create white space in a document
+-   `put_axes()` to place unlabeled axes in a document
 
 ## Installation
 
@@ -39,8 +37,8 @@ install.packages("docxtools")
 Or you can obtain the most recent development version from GitHub.
 
 ``` r
-install.packages("devtools")
-devtools::install_github("graphdr/docxtools")
+install.packages("remotes")
+remotes::install_github("graphdr/docxtools")
 ```
 
 ## Usage
@@ -77,255 +75,130 @@ knitr::kable(y, align = "ccrrrr")
 ```
 
 <table>
-
 <thead>
-
 <tr>
-
 <th style="text-align:center;">
-
 date
-
 </th>
-
 <th style="text-align:center;">
-
 trial
-
 </th>
-
 <th style="text-align:right;">
-
-T\_K
-
+T_K
 </th>
-
 <th style="text-align:right;">
-
-p\_Pa
-
+p_Pa
 </th>
-
 <th style="text-align:right;">
-
 R
-
 </th>
-
 <th style="text-align:right;">
-
 density
-
 </th>
-
 </tr>
-
 </thead>
-
 <tbody>
-
 <tr>
-
 <td style="text-align:center;">
-
 2018-06-12
-
 </td>
-
 <td style="text-align:center;">
-
 a
-
 </td>
-
 <td style="text-align:right;">
-
-\(294.05\)
-
+$294.05$
 </td>
-
 <td style="text-align:right;">
-
-\({101.1}\times 10^{3}\)
-
+${101.1}\times 10^{3}$
 </td>
-
 <td style="text-align:right;">
-
-\(287\)
-
+$287$
 </td>
-
 <td style="text-align:right;">
-
-\(1.198\)
-
+$1.198$
 </td>
-
 </tr>
-
 <tr>
-
 <td style="text-align:center;">
-
 2018-06-13
-
 </td>
-
 <td style="text-align:center;">
-
 b
-
 </td>
-
 <td style="text-align:right;">
-
-\(294.15\)
-
+$294.15$
 </td>
-
 <td style="text-align:right;">
-
-\({101.0}\times 10^{3}\)
-
+${101.0}\times 10^{3}$
 </td>
-
 <td style="text-align:right;">
-
-\(287\)
-
+$287$
 </td>
-
 <td style="text-align:right;">
-
-\(1.196\)
-
+$1.196$
 </td>
-
 </tr>
-
 <tr>
-
 <td style="text-align:center;">
-
 2018-06-14
-
 </td>
-
 <td style="text-align:center;">
-
 c
-
 </td>
-
 <td style="text-align:right;">
-
-\(294.65\)
-
+$294.65$
 </td>
-
 <td style="text-align:right;">
-
-\({101.1}\times 10^{3}\)
-
+${101.1}\times 10^{3}$
 </td>
-
 <td style="text-align:right;">
-
-\(287\)
-
+$287$
 </td>
-
 <td style="text-align:right;">
-
-\(1.196\)
-
+$1.196$
 </td>
-
 </tr>
-
 <tr>
-
 <td style="text-align:center;">
-
 2018-06-15
-
 </td>
-
 <td style="text-align:center;">
-
 d
-
 </td>
-
 <td style="text-align:right;">
-
-\(293.35\)
-
+$293.35$
 </td>
-
 <td style="text-align:right;">
-
-\({101.0}\times 10^{3}\)
-
+${101.0}\times 10^{3}$
 </td>
-
 <td style="text-align:right;">
-
-\(287\)
-
+$287$
 </td>
-
 <td style="text-align:right;">
-
-\(1.200\)
-
+$1.200$
 </td>
-
 </tr>
-
 <tr>
-
 <td style="text-align:center;">
-
 2018-06-16
-
 </td>
-
 <td style="text-align:center;">
-
 e
-
 </td>
-
 <td style="text-align:right;">
-
-\(293.85\)
-
+$293.85$
 </td>
-
 <td style="text-align:right;">
-
-\({101.1}\times 10^{3}\)
-
+${101.1}\times 10^{3}$
 </td>
-
 <td style="text-align:right;">
-
-\(287\)
-
+$287$
 </td>
-
 <td style="text-align:right;">
-
-\(1.199\)
-
+$1.199$
 </td>
-
 </tr>
-
 </tbody>
-
 </table>
 
 Using `put_gap()` with knitr and R markdown, the gap height is specified
@@ -343,7 +216,7 @@ in the R code-chunk header.
 
 <pre class="r"><code>```{r fig.height = 2}
 # first quadrant axes
-put_axes(1, col = "blue", size = 0.5)
+put_axes(1, col = "blue", linewidth = 0.5)
 <code>```</code></code></pre>
 
 <img src="man/figures/README-005-1.png" width="33%" style="display: block; margin: auto;" />

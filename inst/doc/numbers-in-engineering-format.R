@@ -21,6 +21,7 @@ options(tibble.print_min = 8L, tibble.print_max = 8L)
 
 ## -----------------------------------------------------------------------------
 library("dplyr")
+library("purrr")
 library("knitr")
 library("docxtools")
 
@@ -36,7 +37,7 @@ density_engr <- format_engr(density)
 density_engr
 
 ## -----------------------------------------------------------------------------
-map_chr(density_engr, class)
+purrr::map_chr(density_engr, class)
 
 ## -----------------------------------------------------------------------------
 kable(density_engr)

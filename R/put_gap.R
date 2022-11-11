@@ -19,24 +19,12 @@ NULL
 #' @param fill Fill color, default is \code{"transparent"}
 #'
 #' @return Prints the box to the output document.
-#'
-#' @examples
-#' put_gap()
-#' put_gap(col = "gray")
-#' put_gap(col = "black", fill = "gray")
-#'
-#' \dontrun{
-#' # In an R Markdown script
-#' ```{r fig.height = 0.75}
-#' put_gap()
-#' ```}
-#'
 #' @export
 put_gap <- function(col = NULL, fill = NULL) {
   if (is.null(col)) col <- "transparent"
   if (is.null(fill)) fill <- "transparent"
   p <- ggplot() +
-    theme(panel.background = element_rect(color = col, fill = fill, size = 0.5))
+    theme(panel.background = element_rect(color = col, fill = fill, linewidth = 0.5))
   print(p)
 }
 "put_gap"
